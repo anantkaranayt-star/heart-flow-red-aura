@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[ FLOW: RED AURA CORE ]</title>
+</head>
+<body style="background-color:#020202; color:#ff3333; font-family:'Courier New', monospace; display:flex; flex-direction:column; justify-content:center; align-items:center; height:100vh; margin:0; overflow:hidden;">
+
+    <div style="border:1px solid #ff3333; padding:40px; background:#070707; text-align:center; box-shadow:0 0 25px rgba(255,51,51,0.2); max-width:500px; border-radius:4px;">
+        <h2 style="letter-spacing:3px; color:#ff4444;">[ SECURE DECRYPTION GATE ]</h2>
+        <p style="color:#ff9999; font-size:13px; line-height:1.5;">Environment verified. AI scrapers disabled. Input the source system access signature password to extract the hidden data string:</p>
+        
+        <input type="password" id="passwordInput" placeholder="ENTER ACCESS PASSWORD..." style="width:90%; padding:14px; background:#000; border:1px solid #ff3333; color:#ff3333; font-family:monospace; text-align:center; margin-bottom:20px; font-size:14px; box-shadow: inset 0 0 5px rgba(255,0,0,0.5);">
+        <br>
+        <button onclick="verifyPasswordAndDraw()" style="background:#ff3333; color:#fff; border:none; padding:12px 35px; font-family:monospace; cursor:pointer; font-weight:bold; letter-spacing:1px; border-radius:2px;">EXECUTE SYSTEM PARSE</button>
+        
+        <div id="outputLog" style="margin-top:25px; min-height:40px; font-size:14px;"></div>
+    </div>
+
+    <script>
+        // Mathematical matrix block mapping your base64 string to the password "heart"
+        const SECURE_MATRIX =;
+        
+        // Non-reversible SHA-256 validation thumbprint for "heart"
+        const ACCESS_SIGNATURE = "504077c10b7596ff1058097bb326f582f3c051fde20e4da3b5fe4a95726af607";
+
+        // Listen for 'Enter' key press inside the password field
+        document.getElementById("passwordInput").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                verifyPasswordAndDraw();
+            }
+        });
+
+        async function verifyPasswordAndDraw() {
+            const userInput = document.getElementById("passwordInput").value.trim().toLowerCase();
+            const log = document.getElementById("outputLog");
+            
+            log.innerHTML = "<span style='color:#ff3333;'>Validating access signatures...</span>";
+
+            try {
+                const msgBuffer = new TextEncoder().encode(userInput);
+                const hashBuffer = await window.crypto.subtle.digest('SHA-256', msgBuffer);
+                const calculatedHash = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+
+                if (calculatedHash !== ACCESS_SIGNATURE) {
+                    setTimeout(() => {
+                        log.innerHTML = "<span style='color:#ff3333;'>ERROR: Authentication Denied. Signature Mismatch.</span>";
+                    }, 400);
+                    return;
+                }
+
+                log.innerHTML = "<span style='color:#00ff66;'>SUCCESS. Extracting data matrix stream...</span>";
+
+                setTimeout(() => {
+                    log.innerHTML = "";
+                    
+                    const generationKey = "f04077c10b7596ff1058097bb326f582f3c051fde20e4da3b5fe4a95726af607";
+                    let decryptedText = "";
+                    
+                    for (let i = 0; i < SECURE_MATRIX.length; i++) {
+                        const keyChar = generationKey.charCodeAt(i % generationKey.length);
+                        decryptedText += String.fromCharCode(SECURE_MATRIX[i] ^ keyChar);
+                    }
+
+                    const container = document.createElement("div");
+                    container.style.display = "flex";
+                    container.style.alignItems = "center";
+                    container.style.background = "#111";
+                    container.style.border = "1px solid #00ff66";
+                    container.style.margin = "15px 0";
+                    container.style.boxShadow = "0 0 15px rgba(0,255,102,0.1)";
+
+                    const codeDisplay = document.createElement("div");
+                    codeDisplay.style.color = "#00ff66";
+                    codeDisplay.style.padding = "15px";
+                    codeDisplay.style.fontSize = "11px"; 
+                    codeDisplay.style.fontWeight = "bold";
+                    codeDisplay.style.letterSpacing = "0.5px";
+                    codeDisplay.style.flexGrow = "1";
+                    codeDisplay.style.textAlign = "left";
+                    codeDisplay.style.wordBreak = "break-all";
+                    codeDisplay.innerText = decryptedText; 
+
+                    const copyBtn = document.createElement("button");
+                    copyBtn.innerText = "COPY";
+                    copyBtn.style.background = "#00ff66";
+                    copyBtn.style.color = "#000";
+                    copyBtn.style.border = "none";
+                    copyBtn.style.padding = "15px 20px";
+                    copyBtn.style.fontFamily = "monospace";
+                    copyBtn.style.fontWeight = "bold";
+                    copyBtn.style.cursor = "pointer";
+                    
+                    copyBtn.onclick = () => {
+                        navigator.clipboard.writeText(decryptedText).then(() => {
+                            copyBtn.innerText = "COPIED!";
+                            copyBtn.style.background = "#bcffb8";
+                            setTimeout(() => {
+                                copyBtn.innerText = "COPY";
+                                copyBtn.style.background = "#00ff66";
+                            }, 2000);
+                        }).catch(() => {
+                            copyBtn.innerText = "FAILED";
+                        });
+                    };
+
+                    container.appendChild(codeDisplay);
+                    container.appendChild(copyBtn);
+                    log.appendChild(container);
+                    
+                    log.innerHTML += "<p style='color:#ff9999; font-size:11px; margin-top:10px;'>Data decrypted. Core sequence extracted.</p>";
+                }, 1200);
+
+            } catch (error) {
+                log.innerHTML = "<span style='color:#ff3333;'>ERROR: System integrity check failed. HTTPS context expected.</span>";
+            }
+        }
+    </script>
+</body>
+</html>
