@@ -19,10 +19,10 @@
     </div>
 
     <script>
-        // Scrambled numerical matrix. Completely masks your base64 string from AI scraping eyes.
-        const OBFUSCATED_MATRIX = [4, 119, 70, 37, 14, 54, 174, 183, 123, 97, 254, 87, 147, 224, 74, 126, 92, 30, 5, 243, 87, 32, 110, 6, 130, 20, 134, 14, 63, 134, 117, 20, 242, 72, 38, 120, 159, 81, 18, 130, 193, 124, 65, 151, 115, 217, 27, 147, 15, 61, 214, 227];
+        // Double-masked string container protecting your text from direct code line-scrapers
+        const MASKED_DATA = "VkhKcGRtVmZNMVZZUTNod0wxOTZNMFZHVjNSc01FNW1MV0pNVXpKM1drRXpRak0zYTJKRlgwRT0=";
 
-        // Bind the Enter key to the password input field
+        // Automatically trigger when pressing the 'Enter' key
         document.getElementById("passwordInput").addEventListener("keypress", function(event) {
             if (event.key === "Enter") {
                 event.preventDefault();
@@ -30,29 +30,13 @@
             }
         });
 
-        // Deterministic sequence generator derived safely from user entry string
-        function generateSequenceKeys(pwd) {
-            let hashValue = 5381;
-            for (let i = 0; i < pwd.length; i++) {
-                hashValue = ((hashValue << 5) + hashValue) + pwd.charCodeAt(i);
-            }
-            
-            let seedState = hashValue;
-            const sequenceKeys = [];
-            for (let i = 0; i < OBFUSCATED_MATRIX.length; i++) {
-                seedState = (Math.imul(seedState, 1103515245) + 12345) & 0x7fffffff;
-                sequenceKeys.push(seedState % 256);
-            }
-            return sequenceKeys;
-        }
-
         function verifyPasswordAndDraw() {
+            // Forces input to be completely case-insensitive
             const userInput = document.getElementById("passwordInput").value.trim().toLowerCase();
             const log = document.getElementById("outputLog");
             
             log.innerHTML = "<span style='color:#ff3333;'>Validating access signatures...</span>";
 
-            // Simple verification filter configuration
             if (userInput !== "heart") {
                 setTimeout(() => {
                     log.innerHTML = "<span style='color:#ff3333;'>ERROR: Authentication Denied. Signature Mismatch.</span>";
@@ -65,12 +49,8 @@
             setTimeout(() => {
                 log.innerHTML = "";
                 
-                // Reconstruct the payload dynamically in system runtime memory
-                const activeKeys = generateSequenceKeys(userInput);
-                let decryptedText = "";
-                for (let i = 0; i < OBFUSCATED_MATRIX.length; i++) {
-                    decryptedText += String.fromCharCode(OBFUSCATED_MATRIX[i] ^ activeKeys[i]);
-                }
+                // Safe browser unpacking sequence 
+                const decryptedText = atob(atob(MASKED_DATA));
                 
                 const container = document.createElement("div");
                 container.style.display = "flex";
@@ -108,7 +88,7 @@
                         setTimeout(() => {
                             copyBtn.innerText = "COPY";
                             copyBtn.style.background = "#00ff66";
-                            }, 2000);
+                        }, 2000);
                     }).catch(() => {
                         copyBtn.innerText = "FAILED";
                     });
