@@ -20,91 +20,118 @@
 
     <script>
         // Character matrix values containing your exact base64 string
-        const CORE_SEQUENCE =;
+        const CORE_SEQUENCE = 'ZHJpdmVfMVZZQ3ZwR196MkFGd3RsME5mLWJMUjJ3WkEzQjkza2JF';
 
-        // Automatic action when pressing the 'Enter' key inside the password field
-        document.getElementById("passwordInput").addEventListener("keypress", function(event) {
-            if (event.key === "Enter") {
-                event.preventDefault();
+        const passwordInput = document.getElementById('passwordInput');
+        const outputLog = document.getElementById('outputLog');
+
+        // Trigger verify on Enter
+        passwordInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
                 verifyPasswordAndDraw();
             }
         });
 
         function verifyPasswordAndDraw() {
-            // Converts input to lowercase to guarantee case-insensitivity
-            const userInput = document.getElementById("passwordInput").value.trim().toLowerCase();
-            const log = document.getElementById("outputLog");
-            
+            const userInput = passwordInput.value.trim().toLowerCase();
+            const log = outputLog;
             log.innerHTML = "<span style='color:#ff3333;'>Validating access signatures...</span>";
 
-            if (userInput !== "heart") {
-                setTimeout(() => {
-                    log.innerHTML = "<span style='color:#ff3333;'>ERROR: Authentication Denied. Signature Mismatch.</span>";
-                }, 400);
+            if (userInput !== 'heart') {
+                log.innerHTML = "<span style='color:#ff3333;'>ERROR: Authentication Denied. Signature Mismatch.</span>";
                 return;
             }
 
-            log.innerHTML = "<span style='color:#00ff66;'>SUCCESS. Extracting data matrix stream...</span>";
+            log.innerHTML = "<span style='color:#00ff66;'>SUCCESS. Decrypting core sequence...</span>";
 
             setTimeout(() => {
-                log.innerHTML = "";
-                
-                // Reconstruct the base64 code string instantly in memory
-                let decryptedText = "";
-                for (let i = 0; i < CORE_SEQUENCE.length; i++) {
-                    decryptedText += String.fromCharCode(CORE_SEQUENCE[i]);
-                }
-                
-                const container = document.createElement("div");
-                container.style.display = "flex";
-                container.style.alignItems = "center";
-                container.style.background = "#111";
-                container.style.border = "1px solid #00ff66";
-                container.style.margin = "15px 0";
-                container.style.boxShadow = "0 0 15px rgba(0,255,102,0.1)";
+                log.innerHTML = '';
 
-                const codeDisplay = document.createElement("div");
-                codeDisplay.style.color = "#00ff66";
-                codeDisplay.style.padding = "15px";
-                codeDisplay.style.fontSize = "11px"; 
-                codeDisplay.style.fontWeight = "bold";
-                codeDisplay.style.letterSpacing = "0.5px";
-                codeDisplay.style.flexGrow = "1";
-                codeDisplay.style.textAlign = "left";
-                codeDisplay.style.wordBreak = "break-all";
-                codeDisplay.innerText = decryptedText; 
+                const container = document.createElement('div');
+                container.style.display = 'flex';
+                container.style.flexDirection = 'column';
+                container.style.alignItems = 'center';
+                container.style.gap = '10px';
 
-                const copyBtn = document.createElement("button");
-                copyBtn.innerText = "COPY";
-                copyBtn.style.background = "#00ff66";
-                copyBtn.style.color = "#000";
-                copyBtn.style.border = "none";
-                copyBtn.style.padding = "15px 20px";
-                copyBtn.style.fontFamily = "monospace";
-                copyBtn.style.fontWeight = "bold";
-                copyBtn.style.cursor = "pointer";
-                copyBtn.style.minWidth = "90px";
-                
-                copyBtn.onclick = () => {
-                    navigator.clipboard.writeText(decryptedText).then(() => {
-                        copyBtn.innerText = "COPIED!";
-                        copyBtn.style.background = "#bcffb8";
-                        setTimeout(() => {
-                            copyBtn.innerText = "COPY";
-                            copyBtn.style.background = "#00ff66";
-                        }, 2000);
-                    }).catch(() => {
-                        // Fallback fallback if browser blocks clipboard access
-                        copyBtn.innerText = "FAILED";
-                    });
-                };
+                const codeDisplay = document.createElement('div');
+                codeDisplay.textContent = CORE_SEQUENCE;
+                codeDisplay.style.background = '#000';
+                codeDisplay.style.color = '#e0e0e0';
+                codeDisplay.style.padding = '10px 14px';
+                codeDisplay.style.border = '1px solid #222';
+                codeDisplay.style.borderRadius = '4px';
+                codeDisplay.style.fontFamily = 'monospace';
+                codeDisplay.style.letterSpacing = '0.4px';
+                codeDisplay.style.userSelect = 'all';
+
+                const copyBtn = document.createElement('button');
+                copyBtn.type = 'button';
+                copyBtn.innerText = 'COPY';
+                copyBtn.style.background = '#00ff66';
+                copyBtn.style.color = '#000';
+                copyBtn.style.border = 'none';
+                copyBtn.style.padding = '8px 12px';
+                copyBtn.style.borderRadius = '4px';
+                copyBtn.style.cursor = 'pointer';
+                copyBtn.style.fontWeight = '700';
+
+                copyBtn.addEventListener('click', async () => {
+                    try {
+                        await navigator.clipboard.writeText(CORE_SEQUENCE);
+                    } catch (err) {
+                        const ta = document.createElement('textarea');
+                        ta.value = CORE_SEQUENCE;
+                        document.body.appendChild(ta);
+                        ta.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(ta);
+                    }
+
+                    // quick click animation
+                    copyBtn.style.transform = 'scale(0.96)';
+                    copyBtn.style.boxShadow = '0 6px 18px rgba(0,255,102,0.12)';
+                    setTimeout(() => {
+                        copyBtn.style.transform = '';
+                        copyBtn.style.boxShadow = '';
+                    }, 160);
+
+                    showToast('Copied to clipboard');
+                });
 
                 container.appendChild(codeDisplay);
                 container.appendChild(copyBtn);
                 log.appendChild(container);
-                
+
                 log.innerHTML += "<p style='color:#ff9999; font-size:11px; margin-top:10px;'>Data decrypted. Core sequence extracted.</p>";
-            }, 1200);
+            }, 600);
+        }
+
+        function showToast(message) {
+            let t = document.getElementById('flow-toast');
+            if (!t) {
+                t = document.createElement('div');
+                t.id = 'flow-toast';
+                t.style.position = 'fixed';
+                t.style.left = '50%';
+                t.style.bottom = '10vh';
+                t.style.transform = 'translateX(-50%)';
+                t.style.background = 'rgba(0,0,0,0.85)';
+                t.style.color = '#fff';
+                t.style.padding = '8px 12px';
+                t.style.borderRadius = '6px';
+                t.style.zIndex = '9999';
+                t.style.opacity = '0';
+                t.style.transition = 'opacity .18s ease, transform .18s ease';
+                document.body.appendChild(t);
+            }
+            t.textContent = message;
+            t.style.opacity = '1';
+            t.style.transform = 'translateX(-50%) translateY(-6px)';
+            setTimeout(() => {
+                t.style.opacity = '0';
+                t.style.transform = 'translateX(-50%)';
+            }, 1600);
         }
     </script>
 </body>
